@@ -18,13 +18,7 @@
  */
  
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
@@ -90,6 +84,7 @@ namespace SHA1GenUtility
             else
             {
                 labelFile.Text = text;
+                WinAPI.SetForegroundWindow(Handle);
             }
         }
 
@@ -103,6 +98,7 @@ namespace SHA1GenUtility
             else
             {
                 labelFile.Text = "Drop files where";
+                WinAPI.SetForegroundWindow(Handle);
                 MessageBox.Show(this, error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -130,7 +126,7 @@ namespace SHA1GenUtility
                         {
                             formatted.AppendFormat("{0:X2}", b);
                         }
-
+                        
                         SetText(formatted.ToString());
                     }
                     finally

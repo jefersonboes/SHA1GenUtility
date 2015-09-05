@@ -25,11 +25,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SHA1GenUtility")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Generate hashes for files")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SHA1GenUtility")]
-[assembly: AssemblyCopyright("Copyright ©  2015")]
+[assembly: AssemblyCopyright("Copyright (C) 2015 Jeferson Boes")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
