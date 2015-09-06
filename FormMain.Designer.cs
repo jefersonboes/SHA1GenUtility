@@ -47,6 +47,7 @@ namespace SHA1GenUtility
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.labelFile = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -67,6 +68,7 @@ namespace SHA1GenUtility
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
             this.Controls.Add(this.labelFile);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormMain";
             this.Text = "SHA1GenUtility";
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
