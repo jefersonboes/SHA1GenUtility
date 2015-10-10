@@ -64,6 +64,7 @@ namespace SHA1GenUtility
             // 
             // combHashType
             // 
+            this.combHashType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.combHashType.DisplayMember = "0";
             this.combHashType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.combHashType.FormattingEnabled = true;
