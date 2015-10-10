@@ -32,6 +32,8 @@ namespace SHA1GenUtility
         public FormMain()
         {
             InitializeComponent();
+
+            combHashType.SelectedIndex = 0;
         }
 
         private string filename;
@@ -108,34 +110,28 @@ namespace SHA1GenUtility
             try
             {
                 FileStream fs = new FileStream(filename, FileMode.Open);
+                BufferedStream bs = new BufferedStream(fs);
                 try
                 {
-                    BufferedStream bs = new BufferedStream(fs);
-                    try
+                    SHA1Managed sha1 = new SHA1Managed();
+
+                    SetText("Wait");
+
+                    byte[] hash = sha1.ComputeHash(bs);
+
+                    //Convert.ToBase64String(hash))
+
+                    StringBuilder formatted = new StringBuilder(2 * hash.Length);
+                    foreach (byte b in hash)
                     {
-                        SHA1Managed sha1 = new SHA1Managed();
-
-                        SetText("Wait");
-
-                        byte[] hash = sha1.ComputeHash(bs);
-
-                        //Convert.ToBase64String(hash))
-
-                        StringBuilder formatted = new StringBuilder(2 * hash.Length);
-                        foreach (byte b in hash)
-                        {
-                            formatted.AppendFormat("{0:X2}", b);
-                        }
+                        formatted.AppendFormat("{0:X2}", b);
+                    }
                         
-                        SetText(formatted.ToString());
-                    }
-                    finally
-                    {
-                        bs.Close();
-                    }
+                    SetText(formatted.ToString());
                 }
                 finally
                 {
+                    bs.Close();
                     fs.Close();
                 }
             }
@@ -143,13 +139,94 @@ namespace SHA1GenUtility
             {
                 SetError("Error generating the hash");
             }
+        }
 
+        private void SHA256Gen()
+        {
+            try
+            {
+                FileStream fs = new FileStream(filename, FileMode.Open);
+                BufferedStream bs = new BufferedStream(fs);
+                try
+                {
+                    SHA256Managed sha256 = new SHA256Managed();
+
+                    SetText("Wait");
+
+                    byte[] hash = sha256.ComputeHash(bs);
+
+                    StringBuilder formatted = new StringBuilder(2 * hash.Length);
+                    foreach (byte b in hash)
+                    {
+                        formatted.AppendFormat("{0:X2}", b);
+                    }
+
+                    SetText(formatted.ToString());
+                }
+                finally
+                {
+                    bs.Close();
+                    fs.Close();
+                }
+            }
+            catch (Exception)
+            {
+                SetError("Error generating the hash");
+            }
+        }
+
+        private void MD5Gen()
+        {
+            try
+            {
+                FileStream fs = new FileStream(filename, FileMode.Open);
+                BufferedStream bs = new BufferedStream(fs);
+                try
+                {
+                    MD5 md5 = MD5.Create();
+
+                    SetText("Wait");
+
+                    byte[] hash = md5.ComputeHash(bs);
+
+                    StringBuilder formatted = new StringBuilder(2 * hash.Length);
+                    foreach (byte b in hash)
+                    {
+                        formatted.AppendFormat("{0:X2}", b);
+                    }
+
+                    SetText(formatted.ToString());
+                }
+                finally
+                {
+                    bs.Close();
+                    fs.Close();
+                }
+            }
+            catch (Exception)
+            {
+                SetError("Error generating the hash");
+            }
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
-            Thread t = new Thread(SHA1Gen);
-            t.Start();
+            Thread thread = null;
+
+            switch (combHashType.SelectedIndex)
+            {
+                case 0:
+                    thread = new Thread(SHA1Gen);
+                    break;
+                case 1:
+                    thread = new Thread(SHA256Gen);
+                    break;
+                case 2:
+                    thread = new Thread(MD5Gen);
+                    break;
+            }
+
+            thread.Start();
         }
     }
 }

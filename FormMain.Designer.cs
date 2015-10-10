@@ -49,6 +49,7 @@ namespace SHA1GenUtility
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.labelFile = new System.Windows.Forms.Label();
+            this.combHashType = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // labelFile
@@ -56,17 +57,32 @@ namespace SHA1GenUtility
             this.labelFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.labelFile.Location = new System.Drawing.Point(1, 101);
             this.labelFile.Name = "labelFile";
-            this.labelFile.Size = new System.Drawing.Size(283, 13);
+            this.labelFile.Size = new System.Drawing.Size(428, 13);
             this.labelFile.TabIndex = 0;
             this.labelFile.Text = "Drop files where";
             this.labelFile.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // combHashType
+            // 
+            this.combHashType.DisplayMember = "0";
+            this.combHashType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.combHashType.FormattingEnabled = true;
+            this.combHashType.Items.AddRange(new object[] {
+            "Generate SHA1",
+            "Generate SHA256",
+            "Generate MD5"});
+            this.combHashType.Location = new System.Drawing.Point(12, 12);
+            this.combHashType.Name = "combHashType";
+            this.combHashType.Size = new System.Drawing.Size(405, 21);
+            this.combHashType.TabIndex = 1;
             // 
             // FormMain
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(429, 261);
+            this.Controls.Add(this.combHashType);
             this.Controls.Add(this.labelFile);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormMain";
@@ -80,6 +96,7 @@ namespace SHA1GenUtility
         #endregion
 
         private System.Windows.Forms.Label labelFile;
+        private System.Windows.Forms.ComboBox combHashType;
     }
 }
 
