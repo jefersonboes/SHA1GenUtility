@@ -75,6 +75,7 @@ namespace SHA1GenUtility
         }
 
         delegate void SetTextCallback(string text);
+        delegate void SetCursorCallback(Cursor cursor);
 
         private void SetText(string text)
         {
@@ -104,7 +105,20 @@ namespace SHA1GenUtility
                 MessageBox.Show(this, error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-       
+
+        private void SetCursor(Cursor cursor)
+        {
+            if (InvokeRequired)
+            {
+                SetCursorCallback d = new SetCursorCallback(SetCursor);
+                Invoke(d, new object[] { cursor });
+            }
+            else
+            {
+                this.Cursor = cursor;
+            }
+        }
+
         private byte[] ComputeHashSha1(Stream stream)
         {
             SHA1Managed sha1 = new SHA1Managed();
@@ -135,6 +149,7 @@ namespace SHA1GenUtility
                 try
                 {
                     SetText("Wait");
+                    SetCursor(Cursors.WaitCursor);
 
                     byte[] hash = null;
 
@@ -163,6 +178,8 @@ namespace SHA1GenUtility
                 }
                 finally
                 {
+                    SetCursor(Cursors.Default);
+
                     bs.Close();
                     fs.Close();
                 }
