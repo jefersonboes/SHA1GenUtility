@@ -144,7 +144,7 @@ namespace SHA1GenUtility
         {
             try
             {
-                FileStream fs = new FileStream(filename, FileMode.Open);
+                FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
                 BufferedStream bs = new BufferedStream(fs);
                 try
                 {
