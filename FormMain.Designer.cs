@@ -64,7 +64,7 @@ namespace SHA1GenUtility
             this.labelFile.Name = "labelFile";
             this.labelFile.Size = new System.Drawing.Size(647, 13);
             this.labelFile.TabIndex = 0;
-            this.labelFile.Text = "Drop files where";
+            this.labelFile.Text = "Drop files here";
             this.labelFile.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // combHashType

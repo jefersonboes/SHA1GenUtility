@@ -84,7 +84,7 @@ namespace SHA1GenUtility
 
                     UIThread(() =>
                     {
-                        labelFile.Text = "Drop files where";
+                        labelFile.Text = "Drop files here";
                         listBox1.Items.Add(Path.GetFileName(filename) + " - " + hash);
                         this.Cursor = Cursors.Default;
 
