@@ -1,5 +1,5 @@
 ﻿/* SHA1GenUtility - Generate hashes for files 
- * Copyright (C) 2015 Jeferson Boes
+ * Copyright (C) 2015-2016 Jeferson Boes
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,24 +19,25 @@
  
 using System;
 using System.Windows.Forms;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Text;
 
 namespace SHA1GenUtility
 {
     public partial class FormMain : Form
     {
+        private Semaphore pool;
+
         public FormMain()
         {
             InitializeComponent();
 
             combHashType.SelectedIndex = 0;
+
+            pool = new Semaphore(4, 4);
         }
-
-        private string filename;
-        private int hashType = 0;
-
+        
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
@@ -45,88 +46,86 @@ namespace SHA1GenUtility
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
-            hashType = combHashType.SelectedIndex;
+            int hashType = combHashType.SelectedIndex;
+
+            listBox1.Items.Clear();
 
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string file in files)
+            for (int i = 0; i < files.Length; i++)
             {
-                Console.WriteLine(file);
-                filename = file;
-            }
+                String fileName = files[i];
 
-            if (File.GetAttributes(filename).HasFlag(FileAttributes.Directory))
-            {
-                labelFile.Text = "Drop files where";
-            }
-            else { 
-                Thread thread = new Thread(GenerateHash);
-                thread.Start();
+                if (!File.GetAttributes(fileName).HasFlag(FileAttributes.Directory))
+                {
+                    new Thread(() => GenerateHash(fileName, hashType, i == files.Length - 1)).Start();
+                }
             }
         }
-
-        delegate void SetTextCallback(string text);
-        delegate void SetCursorCallback(Cursor cursor);
-
-        private void SetText(string text)
+        private void UIThread(Action a)
         {
-            if (labelFile.InvokeRequired)
-            {
-                SetTextCallback d = new SetTextCallback(SetText);
-                Invoke(d, new object[] { text });
-            }
-            else
-            {
-                labelFile.Text = text;
-                WinAPI.SetForegroundWindow(Handle);
-            }
+            this.BeginInvoke(new MethodInvoker(a));
         }
 
-        private void SetError(string error)
+        private void GenerateHash(string filename, int hashType, bool last)
         {
-            if (InvokeRequired)
-            {
-                SetTextCallback d = new SetTextCallback(SetError);
-                Invoke(d, new object[] { error });
-            }
-            else
-            {
-                labelFile.Text = "Drop files where";
-                WinAPI.SetForegroundWindow(Handle);
-                MessageBox.Show(this, error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void SetCursor(Cursor cursor)
-        {
-            if (InvokeRequired)
-            {
-                SetCursorCallback d = new SetCursorCallback(SetCursor);
-                Invoke(d, new object[] { cursor });
-            }
-            else
-            {
-                this.Cursor = cursor;
-            }
-        }
-        
-        private void GenerateHash()
-        {
+            pool.WaitOne();
             try
             {
-                SetText("Please wait...");
-                SetCursor(Cursors.WaitCursor);
+                try
+                {
+                    UIThread(() =>
+                    {
+                        labelFile.Text = "Please wait...";
+                        this.Cursor = Cursors.WaitCursor;
+                    });
 
-                HashComputer hashComputer = new HashComputer();
-                String hash = hashComputer.compute(filename, hashType);
+                    HashComputer hashComputer = new HashComputer();
+                    String hash = hashComputer.compute(filename, hashType);
 
-                SetText(hash);
-                SetCursor(Cursors.Default);
+                    UIThread(() =>
+                    {
+                        labelFile.Text = "Drop files where";
+                        listBox1.Items.Add(Path.GetFileName(filename) + " - " + hash);
+                        this.Cursor = Cursors.Default;
+
+                        if (last)
+                            WinAPI.SetForegroundWindow(Handle);
+                    });
+                }
+                catch (Exception)
+                {
+                    UIThread(() =>
+                    {
+                        String error = "Error generating the hash";
+                        labelFile.Text = error;
+                        this.Cursor = Cursors.Default;
+                        WinAPI.SetForegroundWindow(Handle);
+                        MessageBox.Show(this, error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    });
+                }
             }
-            catch (Exception)
+            finally
             {
-                SetError("Error generating the hash");
-                SetCursor(Cursors.Default);
+                pool.Release();
             }
+        }
+
+        private void copyAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StringBuilder itens = new StringBuilder();
+
+            foreach (String item in listBox1.Items)
+            {
+                itens.AppendLine(item);
+            }
+            
+            if (itens.Length > 0)
+                Clipboard.SetText(itens.ToString());
+        }
+
+        private void FormMain_Activated(object sender, EventArgs e)
+        {
+            listBox1.Focus();
         }
     }
 }
