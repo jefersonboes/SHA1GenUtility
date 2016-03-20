@@ -18,11 +18,9 @@
  */
  
 using System;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
-using System.Security.Cryptography;
 using System.Threading;
 
 namespace SHA1GenUtility
@@ -37,41 +35,33 @@ namespace SHA1GenUtility
         }
 
         private string filename;
+        private int hashType = 0;
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
         {
-            Debug.WriteLine("OnDragEnter");
-            bool validData = GetFilename(e);
-            if (validData)
-            {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
                 e.Effect = DragDropEffects.Copy;
-            }
-            else
-            {
-                e.Effect = DragDropEffects.None;
-                labelFile.Text = "Drop files where";
-            }
         }
 
-        protected bool GetFilename(DragEventArgs e)
+        private void Form1_DragDrop(object sender, DragEventArgs e)
         {
-            filename = String.Empty;
+            hashType = combHashType.SelectedIndex;
 
-            if ((e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files)
             {
-                Array data = ((IDataObject)e.Data).GetData("FileName") as Array;
-                if (data != null)
-                {
-                    if ((data.Length == 1) && (data.GetValue(0) is String))
-                    {
-                        filename = ((string[])data)[0];
-                        if (File.Exists(filename))
-                            return true;
-                    }
-                }
+                Console.WriteLine(file);
+                filename = file;
             }
 
-            return false;
+            if (File.GetAttributes(filename).HasFlag(FileAttributes.Directory))
+            {
+                labelFile.Text = "Drop files where";
+            }
+            else { 
+                Thread thread = new Thread(GenerateHash);
+                thread.Start();
+            }
         }
 
         delegate void SetTextCallback(string text);
@@ -118,87 +108,25 @@ namespace SHA1GenUtility
                 this.Cursor = cursor;
             }
         }
-
-        private byte[] ComputeHashSha1(Stream stream)
-        {
-            SHA1Managed sha1 = new SHA1Managed();
-
-            return sha1.ComputeHash(stream);
-        }
-
-        private byte[] ComputeHashSha256(Stream stream)
-        {
-            SHA256Managed sha256 = new SHA256Managed();
-
-            return sha256.ComputeHash(stream);
-        }
-
-        private byte[] ComputeHashMD5(Stream stream)
-        {
-            MD5 md5 = MD5.Create();
-
-            return md5.ComputeHash(stream);
-        }
-
+        
         private void GenerateHash()
         {
             try
             {
-                FileStream fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
-                BufferedStream bs = new BufferedStream(fs);
-                try
-                {
-                    SetText("Wait");
-                    SetCursor(Cursors.WaitCursor);
+                SetText("Please wait...");
+                SetCursor(Cursors.WaitCursor);
 
-                    byte[] hash = null;
+                HashComputer hashComputer = new HashComputer();
+                String hash = hashComputer.compute(filename, hashType);
 
-                    switch (hashType)
-                    {
-                        case 0:
-                            hash = ComputeHashSha1(bs);
-                            break;
-                        case 1:
-                            hash = ComputeHashSha256(bs);
-                            break;
-                        case 2:
-                            hash = ComputeHashMD5(bs);
-                            break;
-                    }
-
-                    //Convert.ToBase64String(hash))
-
-                    StringBuilder formatted = new StringBuilder(2 * hash.Length);
-                    foreach (byte b in hash)
-                    {
-                        formatted.AppendFormat("{0:X2}", b);
-                    }
-
-                    SetText(formatted.ToString());
-                }
-                finally
-                {
-                    SetCursor(Cursors.Default);
-
-                    bs.Close();
-                    fs.Close();
-                }
+                SetText(hash);
+                SetCursor(Cursors.Default);
             }
             catch (Exception)
             {
                 SetError("Error generating the hash");
+                SetCursor(Cursors.Default);
             }
-        }
-
-        private int hashType = 0;
-
-        private void Form1_DragDrop(object sender, DragEventArgs e)
-        {
-            hashType = combHashType.SelectedIndex;
-            
-            Thread thread = new Thread(GenerateHash);
-
-            thread.Start();
         }
     }
 }

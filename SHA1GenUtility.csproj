@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HashComputer.cs" />
     <Compile Include="WinAPI.cs" />
     <Compile Include="FormMain.cs">
       <SubType>Form</SubType>
